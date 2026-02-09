@@ -1,0 +1,21 @@
+---
+title: "File Conversion"
+description: "How to convert files using the InBrowser API"
+---
+
+## Overview
+
+File conversion is the core functionality of InBrowser. Simply upload a file through the UI or API, select the target format, and download the resulting file.
+
+### How it works
+
+1.  **Frontend**: Users interact with the React-based UI or use the API client.
+2.  **Upload**: Files are streamed to the `/api/convert` endpoint.
+3.  **Processing**:
+    - **Documents**: Parsed and reformatted using libraries like `pdf-parse` (for PDF -> Text) and `docx` (for creating Word docs).
+    - **Media**: Piped directly through FFmpeg processes for efficient video/audio encoding.
+4.  **Download**: The converted stream is returned immediately to the client.
+
+### Privacy & Security
+
+InBrowser is designed with privacy in mind. Files are processed in-memory (streams) whenever possible and are **not persistently stored** on the server disk after the request completes. This ensures your data remains transient and private.

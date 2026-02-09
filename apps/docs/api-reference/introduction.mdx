@@ -1,0 +1,32 @@
+---
+title: "Introduction"
+description: "Welcome to the InBrowser API documentation"
+---
+
+## Overview
+
+InBrowser is a powerful file and media conversion platform that prioritizes privacy and performance. Unlike traditional converters, many of our tools run directly in the browser using WebAssembly, ensuring your files never leave your device when possible.
+
+For server-side operations (where heavy processing is required), we provide a robust REST API endpoints.
+
+## Authentication
+
+Currently, the API is open for development purposes. Authentication details will be added as the project matures.
+
+## Base URL
+
+By default, the API is accessible at:
+
+```bash
+http://localhost:3000
+```
+
+## Response Format
+
+All API responses are returned in JSON format (for errors/metadata) or binary streams (for file conversions).
+
+```json
+{
+  "error": "Error message description"
+}
+```

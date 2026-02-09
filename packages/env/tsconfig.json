@@ -1,0 +1,3 @@
+{
+  "extends": "@InBrowser/config/tsconfig.base.json"
+}

@@ -1,0 +1,38 @@
+---
+title: "Supported Formats"
+description: "List of file formats compatible with InBrowser"
+---
+
+## Document Formats
+
+InBrowser supports direct conversion between various document formats, leveraging libraries like `pdf-parse`, `jsPDF`, and `docx`.
+
+| Supported Conversions               | Output Formats  |
+| :---------------------------------- | :-------------- |
+| **PDF**                             | `.docx`, `.txt` |
+| **TEXT** (`.txt`)                   | `.pdf`, `.docx` |
+| **Image** (`.jpg`, `.png`, `.webp`) | `.pdf`          |
+
+## Media Formats (FFmpeg)
+
+For multimedia files, we leverage FFmpeg on the server to ensure high-quality conversion. Ensure your input files use standard codecs.
+
+### Video Output
+
+- `.mp4` - Default streaming format (H.264/AAC usually)
+- `.webm` - Web-optimized media (VP8/VP9/AV1)
+- `.mkv` - High quality container
+- `.mov` - QuickTime format
+- `.avi` - Legacy Windows format
+
+### Audio Output
+
+- `.mp3`, `.wav`, `.ogg`, `.aac`, `.flac`
+
+### Image Output
+
+- `.png`, `.jpg`/`.jpeg`, `.webp`, `.gif`, `.bmp`, `.tiff`
+
+## Future Support
+
+We are actively working on adding more formats, including specialized ebook formats (EPUB) and compressed archives (ZIP/7z).

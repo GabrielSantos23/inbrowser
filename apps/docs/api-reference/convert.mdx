@@ -1,0 +1,62 @@
+---
+title: "Convert File"
+api: "POST /api/convert"
+description: "Convert media and document files between different formats"
+---
+
+This endpoint allows you to convert uploaded files to a variety of target formats. Depending on the file type, conversion happens via specialized document libraries or FFmpeg for media.
+
+## Request Body
+
+<ParamField body="file" type="file" required>
+  The file to be converted. Can be a document (PDF, TXT), image, or media file.
+</ParamField>
+
+<ParamField body="format" type="string" required>
+  The target output format extension (e.g., `mp4`, `pdf`, `docx`).
+</ParamField>
+
+## Response
+
+On success, the API returns the converted file as a download stream with:
+
+- `Content-Type`: The MIME type of the converted file.
+- `Content-Disposition`: `attachment; filename="converted.<ext>"`
+
+### Error Response
+
+If the conversion fails (e.g., unsupported format or server error), a JSON response is returned:
+
+```json
+{
+  "error": "Format mp4 not supported"
+}
+```
+
+## Examples
+
+<CodeGroup>
+```bash cURL
+curl -X POST http://localhost:3000/api/convert \
+  -F "file=@/path/to/video.webm" \
+  -F "format=mp4" \
+  --output converted.mp4
+```
+
+```javascript JavaScript
+const formData = new FormData();
+formData.append("file", fileInput.files[0]);
+formData.append("format", "mp4");
+
+const response = await fetch("/api/convert", {
+  method: "POST",
+  body: formData,
+});
+
+if (response.ok) {
+  const blob = await response.blob();
+  // Handle download...
+}
+```
+
+</CodeGroup>
