@@ -233,17 +233,18 @@ app.post("/api/convert", async (c) => {
       return c.json({ error: "Unsupported conversion" }, 400);
     }
 
-    if (typeof result === "string") {
-      return c.body(result, 200, {
-        "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${filename}"`,
-      });
-    } else {
-      return c.body(new Uint8Array(result), 200, {
-        "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${filename}"`,
-      });
-    }
+    // Convert result to base64 for JSON response
+    const base64Data = typeof result === "string" 
+      ? Buffer.from(result).toString("base64")
+      : result.toString("base64");
+
+    return c.json({
+      success: true,
+      filename: filename,
+      contentType: contentType,
+      data: base64Data,
+      size: result.length
+    }, 200);
   } catch (error) {
     console.error("Conversion error:", error);
     return c.json({ error: "Conversion failed" }, 500);
