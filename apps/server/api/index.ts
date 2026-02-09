@@ -172,7 +172,8 @@ app.post("/api/convert", async (c) => {
 
       try {
         // Write the input file to disk
-        await Bun.write(inputPath, file);
+        const fileBuffer = Buffer.from(await file.arrayBuffer());
+        await fs.promises.writeFile(inputPath, fileBuffer);
 
         console.log(`Starting ffmpeg: ${inputPath} -> ${outputPath}`);
 
