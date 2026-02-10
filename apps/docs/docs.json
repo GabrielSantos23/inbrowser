@@ -18,8 +18,16 @@
             "pages": ["index", "quickstart", "development"]
           },
           {
+            "group": "Development",
+            "pages": ["development/testing-tools"]
+          },
+          {
             "group": "Features",
             "pages": ["features/file-conversion", "features/supported-formats"]
+          },
+          {
+            "group": "Project",
+            "pages": ["changelog"]
           }
         ]
       },

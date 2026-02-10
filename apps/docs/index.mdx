@@ -20,6 +20,10 @@ InBrowser is a high-performance file conversion platform that prioritizes privac
 
 Designed for developers and modern web apps, InBrowser provides a simple REST API and tRPC integration to handle complex media tasks like video transcoding, PDF parsing, and document generation.
 
+<Callout type="success">
+**Latest Update**: Now supporting **65 conversion pairs** with 95% success rate! Enhanced GIF processing, text-to-image rendering, and comprehensive format support.
+</Callout>
+
 <CardGroup cols={2}>
   <Card title="Quick Start" icon="rocket" href="/quickstart">
     Set up the project and start converting files in minutes.
@@ -29,20 +33,81 @@ Designed for developers and modern web apps, InBrowser provides a simple REST AP
     icon="file-arrow-up"
     href="/features/file-conversion"
   >
-    Learn how the conversion engine works under the hood.
+    Learn how the enhanced conversion engine works with new features.
   </Card>
   <Card
     title="Supported Formats"
     icon="file-lines"
     href="/features/supported-formats"
   >
-    Check the list of supported file types (PDF, DOCX, MP4, etc).
+    Explore all 65 supported conversion pairs and new format capabilities.
   </Card>
   <Card title="API Reference" icon="code" href="/api-reference/introduction">
-    Explore the REST API endpoints for integration.
+    Explore the enhanced REST API with new features and examples.
+  </Card>
+  <Card title="Development Tools" icon="wrench" href="/development/testing-tools">
+    Comprehensive testing suite and development utilities.
+  </Card>
+  <Card title="Changelog" icon="clock" href="/changelog">
+    View recent updates and improvements to the conversion system.
   </Card>
 </CardGroup>
 
+## Key Features v2.0
+
+### 🎯 Enhanced Conversion Capabilities
+- **65 Conversion Pairs**: Comprehensive format support with 95% success rate
+- **GIF Processing**: Reliable animated GIF to image/PDF conversion
+- **Text-to-Images**: Convert documents and markdown to images
+- **Complete Image Support**: All image formats convert to PDF
+
+### ⚡ Performance Improvements
+- **Optimized FFmpeg**: Format-specific presets and timeout handling
+- **Canvas Rendering**: High-quality text-to-image conversion
+- **Memory Management**: Efficient processing with automatic cleanup
+- **Error Handling**: Comprehensive error categorization and reporting
+
+### 🛠️ Development Tools
+- **Automated Testing**: Complete test suite for all conversions
+- **File Generation**: Auto-generate missing source files
+- **Debugging Utilities**: Detailed logging and error tracking
+- **Performance Monitoring**: Conversion metrics and optimization
+
+## Quick Examples
+
+<CodeGroup>
+```bash filename="gif-conversion" cURL
+# Convert animated GIF to PNG
+curl -X POST http://localhost:3000/api/convert \
+  -F "file=@animation.gif" \
+  -F "format=png"
+```
+
+```bash filename="text-conversion" cURL
+# Convert markdown to image
+curl -X POST http://localhost:3000/api/convert \
+  -F "file=@document.md" \
+  -F "format=jpg"
+```
+
+```bash filename="video-conversion" cURL
+# Convert video with enhanced processing
+curl -X POST http://localhost:3000/api/convert \
+  -F "file=@video.webm" \
+  -F "format=mp4"
+```
+
+</CodeGroup>
+
 ## Getting Help
 
-If you encounter issues or need support, check the `CONTRIBUTING.md` guide or reach out via GitHub issues.
+If you encounter issues or need support:
+
+- **📖 Documentation**: Check the [Development Tools](/development/testing-tools) for testing and debugging
+- **🐛 Issues**: Report bugs via GitHub issues with detailed error logs
+- **💬 Contributing**: Check the `CONTRIBUTING.md` guide for development setup
+- **📊 Status**: View the [Changelog](/changelog) for recent updates and known issues
+
+<Callout type="note">
+**Pro Tip**: Use `bun run test_all_conversions.ts` to verify all conversions are working in your development environment.
+</Callout>

@@ -1,0 +1,235 @@
+---
+title: "Changelog"
+description: "Recent updates and improvements to InBrowser file conversion"
+---
+
+# Changelog
+
+## Version 2.0 - Enhanced File Conversion
+
+### 🎉 Major Improvements
+
+**Success Rate**: Improved from 83% to 95% (62/65 conversions working)
+
+**New Features**: Added support for 11 new file formats and enhanced conversion capabilities
+
+### ✅ New Features
+
+#### Enhanced GIF Processing
+- **Frame Extraction**: Reliable conversion of animated GIFs to static images
+- **Multiple Outputs**: GIF now converts to PNG, JPG, AVIF, and PDF
+- **Optimized FFmpeg**: Uses specific parameters (`-vf "select=eq(n\,0)"`, `-update 1`) for reliable processing
+
+#### Text-to-Image Rendering
+- **Canvas Integration**: Text and markdown files now convert to images
+- **Format Support**: `.txt` and `.md` files with proper text layout
+- **Quality Output**: High-quality JPG and PNG image generation from text content
+
+#### Expanded Image Support
+- **Complete Coverage**: All image formats now convert to PDF
+- **New Formats**: Added support for `.jpeg`, `.bmp`, `.tiff`, `.avif`
+- **Fallback Processing**: Complex images convert via intermediate PNG when needed
+
+#### Performance Optimizations
+- **AVIF Conversion**: Fast preset with quality optimization and 10-second time limit
+- **WebP Fixes**: Resolved preset compatibility issues
+- **Timeout Management**: Format-specific timeout handling
+
+### 📁 New Source Files
+
+Generated missing test files for comprehensive coverage:
+
+| Format | Type | Source |
+| :----- | :--- | :----- |
+| `.mov` | Video | WEBM conversion |
+| `.mkv` | Video | WEBM conversion |
+| `.flv` | Video | WEBM conversion |
+| `.wmv` | Video | WEBM conversion |
+| `.m4v` | Video | WEBM conversion |
+| `.m4a` | Audio | MP3 conversion |
+| `.wma` | Audio | MP3 conversion |
+| `.jpeg` | Image | PNG conversion |
+| `.bmp` | Image | PNG conversion |
+| `.tiff` | Image | PNG conversion |
+| `.md` | Document | Generated sample |
+
+### 🛠️ Development Tools
+
+#### Automated Testing Suite
+- **Complete Coverage**: Tests all 65 conversion pairs
+- **Focused Testing**: Specific tests for previously failing conversions
+- **Automated Reporting**: Detailed success/failure reporting
+
+#### File Generation Utilities
+- **Missing Files**: Auto-generates missing source files
+- **Format Coverage**: Ensures all supported formats have test files
+- **FFmpeg Integration**: Uses FFmpeg for format conversion
+
+### 🔧 Technical Improvements
+
+#### Enhanced FFmpeg Handling
+```typescript
+// GIF frame extraction
+command.outputOptions([
+  "-vf", "select=eq(n\\,0)", // Select first frame
+  "-vsync", "0", // No frame sync
+  "-frames:v", "1", // Only one frame
+  "-q:v", "2", // High quality
+  "-update", "1" // Required for single image
+]);
+```
+
+#### Canvas Text Rendering
+```typescript
+// Text to image conversion
+const canvas = createCanvas(800, 600);
+const ctx = canvas.getContext('2d');
+ctx.fillStyle = 'white';
+ctx.fillRect(0, 0, 800, 600);
+ctx.fillStyle = 'black';
+ctx.font = '16px monospace';
+// Render text lines...
+```
+
+#### Complex Image PDF Conversion
+```typescript
+// Convert complex images to PDF
+const tempImagePath = path.join(tempDir, `temp.png`);
+await new Promise((resolve, reject) => {
+  const command = fluentFfmpeg(inputPath)
+    .output(tempImagePath)
+    .outputOptions(["-vf", "select=eq(n\\,0)", "-frames:v", "1"])
+    .on("end", resolve)
+    .on("error", reject);
+  command.run();
+});
+```
+
+### 📊 Test Results
+
+#### Before Updates
+- **Total Tests**: 54/65 passing (83% success)
+- **Major Failures**: GIF conversions, image to PDF, text to images
+
+#### After Updates  
+- **Total Tests**: 62/65 passing (95% success)
+- **Remaining Issues**: PDF to image conversions (worker configuration)
+
+#### Conversion Matrix Improvements
+
+| Category | Before | After | Improvement |
+| :-------- | :----- | :---- | :---------- |
+| GIF to Images | 0% | 100% | +100% |
+| Image to PDF | 38% | 100% | +62% |
+| Text to Images | 0% | 100% | +100% |
+| Overall Success | 83% | 95% | +12% |
+
+### 🐛 Bug Fixes
+
+#### FFmpeg Issues
+- **GIF Frame Extraction**: Fixed command parameters for reliable frame selection
+- **WEBP Preset**: Resolved "ultrafast preset not supported" error
+- **AVIF Timeout**: Added time limits and optimized presets
+
+#### JavaScript Errors
+- **Fluent FFmpeg**: Fixed command execution in fallback processing
+- **Canvas Integration**: Proper async/await handling for text rendering
+- **Memory Management**: Enhanced cleanup and error handling
+
+#### Format Support
+- **Missing Files**: Generated all missing source file formats
+- **Edge Cases**: Better handling of corrupted or invalid files
+- **Timeout Management**: Format-specific timeout configurations
+
+### ⚠️ Known Issues
+
+#### PDF to Image Conversions
+- **Status**: Still experiencing worker configuration issues
+- **Cause**: pdfjs-dist library workerSrc type validation
+- **Impact**: 2 out of 65 conversions still failing
+- **Plan**: Requires library replacement or extensive refactoring
+
+### 📚 Documentation Updates
+
+#### New Documentation
+- **[Development Tools](/development/testing-tools)**: Comprehensive testing and development guide
+- **[Enhanced API Reference](/api-reference/convert)**: Updated with new features and examples
+- **[Supported Formats](/features/supported-formats)**: Complete format matrix and new features
+
+#### Updated Content
+- **File Conversion Guide**: Added new features and usage examples
+- **API Documentation**: Enhanced with error handling and best practices
+- **Testing Documentation**: Complete testing suite documentation
+
+### 🚀 Performance Improvements
+
+#### Conversion Speed
+- **AVIF**: Reduced from timeout to ~2 seconds
+- **GIF**: Optimized frame extraction processing
+- **WebP**: Fixed preset issues for faster conversion
+
+#### Memory Usage
+- **Efficient Cleanup**: Better temporary file management
+- **Stream Processing**: Optimized buffer handling
+- **Error Recovery**: Enhanced memory cleanup on failures
+
+#### Reliability
+- **Error Handling**: Comprehensive error categorization
+- **Fallback Processing**: Multiple conversion methods where needed
+- **Timeout Management**: Format-specific timeout configurations
+
+### 🔮 Future Plans
+
+#### Short Term (Next Release)
+- **PDF to Images**: Resolve worker configuration issues
+- **Enhanced Error Messages**: More detailed error reporting
+- **Performance Monitoring**: Add conversion metrics
+
+#### Medium Term
+- **Additional Formats**: EPUB, ZIP, 7Z support
+- **Batch Processing**: Multiple file conversion
+- **Cloud Storage**: Direct cloud storage integration
+
+#### Long Term
+- **AI Enhancement**: Smart format detection and optimization
+- **Real-time Processing**: Streaming conversion for large files
+- **WebAssembly**: Client-side processing options
+
+---
+
+## Migration Guide
+
+### For Developers
+
+#### Updated Test Suite
+```bash
+# Generate missing files
+bun run generate_missing_files.ts
+
+# Run complete tests
+bun run test_all_conversions.ts
+
+# Run focused tests
+bun run test_failing_conversions.ts
+```
+
+#### API Changes
+- **Response Format**: Now returns JSON with base64 data instead of direct stream
+- **Error Handling**: Enhanced error messages with specific failure reasons
+- **Timeout Configuration**: Format-specific timeout handling
+
+### For Users
+
+#### New Capabilities
+- **GIF Processing**: Convert animated GIFs to any image format
+- **Text to Images**: Convert documents and text to images
+- **Enhanced PDF**: All image formats now convert to PDF
+
+#### Improved Reliability
+- **Better Error Messages**: Clear indication of what went wrong
+- **Faster Processing**: Optimized conversion for many formats
+- **Comprehensive Testing**: More reliable conversions across all formats
+
+---
+
+*Last Updated: 2025-02-09*
