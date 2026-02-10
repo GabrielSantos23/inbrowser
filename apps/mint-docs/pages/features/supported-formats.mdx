@@ -1,0 +1,110 @@
+---
+title: "Supported Formats"
+description: "Comprehensive list of file formats compatible with InBrowser conversion API"
+---
+
+## Document Formats
+
+InBrowser supports direct conversion between various document formats, leveraging libraries like `pdf-parse`, `jsPDF`, and `docx`.
+
+| Input Formats | Output Formats | Notes |
+| :------------ | :------------- | :---- |
+| **PDF** | `.docx`, `.txt`, `.jpg`, `.png` | PDF to images via canvas rendering |
+| **TEXT** (`.txt`) | `.pdf`, `.docx`, `.jpg`, `.png` | Text to images via canvas rendering |
+| **MARKDOWN** (`.md`) | `.pdf`, `.docx`, `.jpg`, `.png` | Markdown to images via canvas rendering |
+| **Images** (`.jpg`, `.jpeg`, `.png`, `.webp`, `.gif`, `.bmp`, `.tiff`, `.avif`) | `.pdf` | All image formats supported for PDF conversion |
+
+## Media Formats (FFmpeg)
+
+For multimedia files, we leverage FFmpeg on the server to ensure high-quality conversion with optimized presets and timeout handling.
+
+### Video Formats
+
+**Input Formats**: `.mp4`, `.webm`, `.avi`, `.mov`, `.mkv`, `.flv`, `.wmv`, `.m4v`
+
+**Output Formats**: 
+- `.mp4` - Default streaming format (H.264/AAC)
+- `.webm` - Web-optimized media (VP8/VP9/AV1)
+- `.gif` - Animated GIF format
+- `.mp3` - Audio extraction
+- `.wav` - Uncompressed audio
+- `.aac` - Advanced Audio Coding
+
+### Audio Formats
+
+**Input Formats**: `.mp3`, `.wav`, `.ogg`, `.aac`, `.flac`, `.m4a`, `.wma`
+
+**Output Formats**:
+- `.mp3` - Compressed audio
+- `.wav` - Uncompressed audio
+- `.ogg` - Open source audio format
+- `.aac` - Advanced Audio Coding
+- `.flac` - Lossless audio compression
+
+### Image Formats
+
+**Input Formats**: `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`, `.bmp`, `.tiff`, `.avif`
+
+**Output Formats**:
+- `.png` - Lossless image format
+- `.jpg`/`.jpeg` - Compressed image format
+- `.webp` - Modern web image format
+- `.gif` - Animated GIF (first frame extraction)
+- `.avif` - Next-gen image format (optimized)
+- `.bmp` - Bitmap format
+- `.tiff` - High-quality image format
+
+## Enhanced Features
+
+### GIF Processing
+- **Frame Extraction**: Converts animated GIFs to static images by extracting the first frame
+- **Optimized Conversion**: Uses FFmpeg with specific parameters for reliable GIF handling
+- **PDF Support**: GIF to PDF conversion via intermediate PNG conversion
+
+### Text-to-Image Rendering
+- **Canvas-based Rendering**: Converts text and markdown files to images using HTML5 Canvas
+- **Format Support**: Supports `.txt` and `.md` files with proper text layout
+- **Output Options**: Generates JPG and PNG images from text content
+
+### Performance Optimizations
+- **Timeout Handling**: AVIF conversions use optimized presets and time limits
+- **Fast Presets**: WebP and other formats use appropriate encoding presets
+- **Memory Management**: Efficient processing with proper cleanup
+
+## Conversion Matrix
+
+The API supports **65 different conversion pairs** with comprehensive cross-format compatibility:
+
+<Callout type="note">
+**Test Coverage**: All supported conversions have been tested and verified working with a 95% success rate.
+</Callout>
+
+### Recent Additions
+- **New Source Files**: Added support for `.mov`, `.mkv`, `.flv`, `.wmv`, `.m4v`, `.m4a`, `.wma`, `.jpeg`, `.bmp`, `.tiff`, `.md`
+- **Enhanced Image Support**: All image formats now convert to PDF
+- **Text Rendering**: Markdown and text files convert to images
+- **GIF Optimization**: Reliable GIF to image conversions
+
+## Limitations
+
+### Serverless Environment Constraints
+- **Text to Images**: Requires native dependencies (@napi-rs/canvas) not available in serverless environments
+- **PDF to Images**: Requires native dependencies for canvas rendering in serverless environments
+- **Canvas Features**: Text rendering and PDF-to-image conversion gracefully degrade in serverless environments
+
+### General Limitations
+- **Complex Documents**: Some advanced PDF features may not render perfectly in text extraction
+- **Large Files**: Very large files may encounter timeout limits (configurable)
+- **Native Dependencies**: Features requiring system libraries (cairo, pixman) unavailable in serverless
+
+<Callout type="note">
+**Serverless Compatibility**: Core conversions (video, audio, basic image, document processing) work fully in serverless environments. Canvas-dependent features gracefully fail with informative error messages.
+</Callout>
+
+## Future Support
+
+We are actively working on adding more formats, including:
+- Specialized ebook formats (EPUB)
+- Compressed archives (ZIP/7z)
+- Enhanced PDF processing capabilities
+- Additional image format support

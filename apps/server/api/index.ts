@@ -47,6 +47,10 @@ app.use(
   }),
 );
 
+app.get("/api/health", (c) => {
+  return c.text("OK");
+});
+
 app.post("/api/convert", async (c) => {
   let file: File;
   let format: string;
@@ -92,7 +96,9 @@ app.post("/api/convert", async (c) => {
         contentType = "application/pdf";
         filename = file.name.replace(/\.[^/.]+$/, ".pdf");
       } else if (
-        ["jpg", "jpeg", "png", "webp", "gif", "bmp", "tiff", "avif"].includes(inputExt)
+        ["jpg", "jpeg", "png", "webp", "gif", "bmp", "tiff", "avif"].includes(
+          inputExt,
+        )
       ) {
         // Convert image to PDF using FFmpeg for better format support
         const { default: fluentFfmpeg } = await import("fluent-ffmpeg");
@@ -129,13 +135,17 @@ app.post("/api/convert", async (c) => {
           // Fallback to jsPDF for basic formats or convert complex formats first
           if (["jpg", "jpeg", "png"].includes(inputExt)) {
             const pdf = new jsPDF();
-            const imgData = Buffer.from(await file.arrayBuffer()).toString("base64");
+            const imgData = Buffer.from(await file.arrayBuffer()).toString(
+              "base64",
+            );
             const imgType = inputExt === "png" ? "PNG" : "JPEG";
             pdf.addImage(imgData, imgType, 10, 10, 190, 0);
             result = Buffer.from(pdf.output("arraybuffer"));
             contentType = "application/pdf";
             filename = file.name.replace(/\.[^/.]+$/, ".pdf");
-          } else if (["gif", "webp", "bmp", "tiff", "avif"].includes(inputExt)) {
+          } else if (
+            ["gif", "webp", "bmp", "tiff", "avif"].includes(inputExt)
+          ) {
             // Convert complex image to PNG first, then use jsPDF
             try {
               const tempImagePath = path.join(tempDir, `temp.png`);
@@ -143,18 +153,25 @@ app.post("/api/convert", async (c) => {
                 const command = fluentFfmpeg(inputPath)
                   .output(tempImagePath)
                   .outputOptions([
-                    "-vf", "select=eq(n\\,0)", // Select first frame
-                    "-vsync", "0", // No frame sync
-                    "-frames:v", "1", // Only one frame
-                    "-q:v", "2", // High quality
-                    "-update", "1" // Required for single image
+                    "-vf",
+                    "select=eq(n\\,0)", // Select first frame
+                    "-vsync",
+                    "0", // No frame sync
+                    "-frames:v",
+                    "1", // Only one frame
+                    "-q:v",
+                    "2", // High quality
+                    "-update",
+                    "1", // Required for single image
                   ])
                   .on("end", resolve)
                   .on("error", reject);
                 command.run();
               });
-              
-              const tempImageBuffer = Buffer.from(await fs.promises.readFile(tempImagePath));
+
+              const tempImageBuffer = Buffer.from(
+                await fs.promises.readFile(tempImagePath),
+              );
               const pdf = new jsPDF();
               const imgData = tempImageBuffer.toString("base64");
               pdf.addImage(imgData, "PNG", 10, 10, 190, 0);
@@ -162,7 +179,10 @@ app.post("/api/convert", async (c) => {
               contentType = "application/pdf";
               filename = file.name.replace(/\.[^/.]+$/, ".pdf");
             } catch (conversionErr) {
-              console.error("Complex image to PDF conversion failed:", conversionErr);
+              console.error(
+                "Complex image to PDF conversion failed:",
+                conversionErr,
+              );
               return c.json(
                 {
                   error: `Cannot convert ${inputExt.toUpperCase()} to PDF directly via document task.`,
@@ -255,7 +275,7 @@ app.post("/api/convert", async (c) => {
         );
       }
     }
-// PDF to Image conversion
+    // PDF to Image conversion
     else if (
       inputExt === "pdf" &&
       (outputExt === "jpg" || outputExt === "png")
@@ -267,10 +287,13 @@ app.post("/api/convert", async (c) => {
           const canvasModule = await import("@napi-rs/canvas");
           createCanvas = canvasModule.createCanvas;
         } catch (canvasError) {
-          console.warn("Canvas not available for PDF to image conversion:", canvasError);
+          console.warn(
+            "Canvas not available for PDF to image conversion:",
+            canvasError,
+          );
           return c.json(
-            { 
-              error: `PDF to ${outputExt.toUpperCase()} conversion requires native dependencies not available in serverless environment.` 
+            {
+              error: `PDF to ${outputExt.toUpperCase()} conversion requires native dependencies not available in serverless environment.`,
             },
             400,
           );
@@ -312,42 +335,48 @@ app.post("/api/convert", async (c) => {
         await pdfDocument.destroy();
       } catch (pdfError) {
         console.error("PDF to image conversion failed:", pdfError);
-        const errorMessage = pdfError instanceof Error ? pdfError.message : String(pdfError);
+        const errorMessage =
+          pdfError instanceof Error ? pdfError.message : String(pdfError);
         return c.json(
-          { error: `PDF to ${outputExt.toUpperCase()} conversion failed: ${errorMessage}` },
+          {
+            error: `PDF to ${outputExt.toUpperCase()} conversion failed: ${errorMessage}`,
+          },
           400,
         );
       }
     }
     // Text to Image conversion
-    else if (["txt", "md"].includes(inputExt) && ["jpg", "jpeg", "png", "webp", "avif"].includes(outputExt)) {
+    else if (
+      ["txt", "md"].includes(inputExt) &&
+      ["jpg", "jpeg", "png", "webp", "avif"].includes(outputExt)
+    ) {
       try {
         // Try to import canvas - it might not be available in serverless environments
         const canvasModule = await import("@napi-rs/canvas");
         const createCanvas = canvasModule.createCanvas;
-        
+
         // Use canvas if available
         const textContent = await file.text();
-        const lines = textContent.split('\n').slice(0, 20); // Limit to 20 lines
-        
+        const lines = textContent.split("\n").slice(0, 20); // Limit to 20 lines
+
         const canvas = createCanvas(800, 600);
-        const ctx = canvas.getContext('2d');
-        
+        const ctx = canvas.getContext("2d");
+
         // White background
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = "white";
         ctx.fillRect(0, 0, 800, 600);
-        
+
         // Black text
-        ctx.fillStyle = 'black';
-        ctx.font = '16px monospace';
-        
+        ctx.fillStyle = "black";
+        ctx.font = "16px monospace";
+
         let y = 30;
         for (const line of lines) {
           if (y > 580) break; // Stop if we run out of space
           ctx.fillText(line.substring(0, 80), 20, y); // Limit line length
           y += 20;
         }
-        
+
         if (outputExt === "png") {
           result = await canvas.toBuffer("image/png");
         } else {
@@ -394,16 +423,24 @@ app.post("/api/convert", async (c) => {
           const command = fluentFfmpeg(inputPath).output(outputPath);
 
           // Special handling for different conversions
-          if (inputExt === "gif" && ["png", "jpg", "jpeg", "webp", "avif"].includes(outputExt)) {
+          if (
+            inputExt === "gif" &&
+            ["png", "jpg", "jpeg", "webp", "avif"].includes(outputExt)
+          ) {
             // Convert GIF to static image - extract first frame with better handling
             command.outputOptions([
-              "-vf", "select=eq(n\\,0)", // Select first frame
-              "-vsync", "0", // No frame sync
-              "-frames:v", "1", // Only one frame
-              "-q:v", "2", // High quality
-              "-update", "1" // Required for single image output
+              "-vf",
+              "select=eq(n\\,0)", // Select first frame
+              "-vsync",
+              "0", // No frame sync
+              "-frames:v",
+              "1", // Only one frame
+              "-q:v",
+              "2", // High quality
+              "-update",
+              "1", // Required for single image output
             ]);
-} else if (["mp4", "webm", "gif"].includes(outputExt)) {
+          } else if (["mp4", "webm", "gif"].includes(outputExt)) {
             command.outputOptions("-preset ultrafast");
           } else if (outputExt === "webp") {
             // WEBP doesn't support ultrafast preset
@@ -411,9 +448,12 @@ app.post("/api/convert", async (c) => {
           } else if (outputExt === "avif") {
             // Special handling for AVIF to avoid timeout
             command.outputOptions([
-              "-preset", "fast", // Use fast preset instead of ultrafast
-              "-crf", "30", // Lower quality for faster conversion
-              "-t", "10" // Limit to 10 seconds of input
+              "-preset",
+              "fast", // Use fast preset instead of ultrafast
+              "-crf",
+              "30", // Lower quality for faster conversion
+              "-t",
+              "10", // Limit to 10 seconds of input
             ]);
           }
 

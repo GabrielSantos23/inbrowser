@@ -1,0 +1,46 @@
+---
+title: "Introduction"
+description: "Welcome to the InBrowser API documentation"
+---
+
+## Overview
+
+InBrowser is a powerful file and media conversion platform that prioritizes privacy and performance. Unlike traditional converters, many of our tools run directly in the browser using WebAssembly, ensuring your files never leave your device when possible.
+
+For server-side operations (where heavy processing is required), we provide a robust REST API endpoints.
+
+## Authentication
+
+Currently, the API is open for development purposes. Authentication details will be added as the project matures.
+
+## Base URL
+
+By default, the API is accessible at:
+
+```bash
+https://inbrowser-api.vercel.app
+```
+
+## Response Format
+
+All API responses are returned in JSON format. Successful conversions return the file content as a base64 encoded string along with metadata.
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "filename": "output.pdf",
+  "contentType": "application/pdf",
+  "data": "JVBERi0xLjQKJ...",
+  "size": 1439866
+}
+```
+
+### Error Response
+
+```json
+{
+  "error": "Error message description"
+}
+```

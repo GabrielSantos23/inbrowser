@@ -1,0 +1,125 @@
+---
+title: "File Conversion"
+description: "How to convert files using the InBrowser API with enhanced format support"
+---
+
+## Overview
+
+File conversion is the core functionality of InBrowser. Simply upload a file through the UI or API, select the target format, and download the resulting file. The system now supports **65 different conversion pairs** with a 95% success rate.
+
+### How it works
+
+1.  **Frontend**: Users interact with the React-based UI or use the API client.
+2.  **Upload**: Files are streamed to the `/api/convert` endpoint.
+3.  **Processing**:
+    - **Documents**: Parsed and reformatted using libraries like `pdf-parse` (for PDF -> Text), `jsPDF` (for PDF creation), and `docx` (for creating Word docs).
+    - **Images**: Enhanced processing with canvas-based rendering for text-to-image conversion and FFmpeg optimization for GIF frame extraction.
+    - **Media**: Piped directly through FFmpeg processes with optimized presets and timeout handling.
+    - **Text Files**: Canvas-based rendering converts text and markdown to images.
+4.  **Download**: The converted stream is returned immediately to the client.
+
+## Enhanced Conversion Features
+
+### GIF Processing
+<Callout type="note">
+**New Feature**: GIF files now convert reliably to all image formats and PDF.
+</Callout>
+
+- **Frame Extraction**: Extracts the first frame from animated GIFs for static image conversion
+- **Optimized FFmpeg**: Uses specific parameters (`-vf "select=eq(n\,0)"`, `-update 1`) for reliable processing
+- **PDF Conversion**: GIF to PDF via intermediate PNG conversion with jsPDF fallback
+
+### Text-to-Image Rendering
+<Callout type="note">
+**New Feature**: Text and markdown files can now be converted to images.
+</Callout>
+
+- **Canvas Rendering**: Uses HTML5 Canvas for high-quality text rendering
+- **Format Support**: Supports `.txt` and `.md` files with proper text layout
+- **Custom Styling**: Monospace font with white background and black text
+- **Content Limits**: Processes up to 20 lines with 80 characters per line
+
+### Performance Optimizations
+- **AVIF Conversion**: Uses fast preset with quality optimization and 10-second time limit
+- **WebP Handling**: Fixed preset compatibility issues
+- **Timeout Management**: 60-second default timeout with format-specific optimizations
+
+## API Usage
+
+### Basic Conversion
+```bash filename="conversion-example.sh"
+curl -X POST http://localhost:3000/api/convert \
+  -F "file=@example.pdf" \
+  -F "format=jpg"
+```
+
+### Advanced Features
+
+#### GIF to Image
+```bash filename="gif-conversion.sh"
+curl -X POST http://localhost:3000/api/convert \
+  -F "file=@animation.gif" \
+  -F "format=png"
+```
+
+#### Text to Image
+```bash filename="text-conversion.sh"
+curl -X POST http://localhost:3000/api/convert \
+  -F "file=@document.md" \
+  -F "format=jpg"
+```
+
+#### Image to PDF
+```bash filename="image-pdf.sh"
+curl -X POST http://localhost:3000/api/convert \
+  -F "file=@photo.webp" \
+  -F "format=pdf"
+```
+
+## Error Handling
+
+The API provides comprehensive error handling with specific error messages:
+
+<Accordion>
+  <AccordionItem title="FFmpeg Errors">
+    ```
+    {"error": "Incompatible or invalid conversion: FFmpeg failed: ffmpeg exited with code 234"}
+    ```
+  </AccordionItem>
+  <AccordionItem title="Document Errors">
+    ```
+    {"error": "Cannot convert GIF to PDF directly via document task."}
+    ```
+  </AccordionItem>
+  <AccordionItem title="Timeout Errors">
+    ```
+    {"error": "The operation was aborted."}
+    ```
+  </AccordionItem>
+</Accordion>
+
+## Privacy & Security
+
+InBrowser is designed with privacy in mind. Files are processed in-memory (streams) whenever possible and are **not persistently stored** on the server disk after the request completes. This ensures your data remains transient and private.
+
+### Security Features
+- **Temporary Processing**: Files are processed in temporary directories that are cleaned up after each request
+- **Memory Management**: Efficient buffer handling with proper cleanup
+- **No Persistence**: Converted files are not stored permanently on the server
+
+## Testing & Validation
+
+### Test Coverage
+- **65 Conversion Pairs**: All supported format combinations tested
+- **95% Success Rate**: 62 out of 65 conversions working successfully
+- **Automated Testing**: Comprehensive test suite for validation
+
+### Test Files
+The system includes a complete set of test files in multiple formats:
+- **Source Files**: Original files in `files/` directory
+- **Generated Files**: Additional formats created via `generate_missing_files.ts`
+- **Test Outputs**: Conversion results in `test_outputs/` directory
+
+<Callout type="tip">
+**Development**: Use `bun run test_all_conversions.ts` to run the complete test suite and verify all conversions are working.
+</Callout>

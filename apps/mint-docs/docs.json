@@ -1,0 +1,16 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "InBrowser Documentation",
+  "logo": "/favicon.svg",
+  "favicon": "/favicon.svg",
+  "theme": "mint",
+  "colors": {
+    "primary": "#16A34A"
+  },
+  "navigation": {
+    "pages": [
+      "index",
+      "api-reference/convert"
+    ]
+  }
+}

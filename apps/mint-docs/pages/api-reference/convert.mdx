@@ -1,0 +1,194 @@
+---
+title: "Convert File"
+api: "POST /api/convert"
+description: "Convert media and document files between different formats with enhanced support"
+---
+
+This endpoint allows you to convert uploaded files to a variety of target formats. The system supports **65 different conversion pairs** with specialized processing for different file types.
+
+## Request Body
+
+<ParamField body="file" type="file" required>
+  The file to be converted. Supports documents (PDF, TXT, MD), images (JPG, PNG, GIF, WEBP, AVIF, BMP, TIFF), video (MP4, WEBM, AVI, MOV, MKV, FLV, WMV, M4V), and audio (MP3, WAV, OGG, AAC, FLAC, M4A, WMA) files.
+</ParamField>
+
+<ParamField body="format" type="string" required>
+  The target output format extension. See [Supported Formats](/features/supported-formats) for complete list.
+</ParamField>
+
+## Response
+
+### Success Response
+
+On success, the API returns a JSON response with base64-encoded file data:
+
+```json filename="success-response"
+{
+  "success": true,
+  "filename": "converted.mp4",
+  "contentType": "video/mp4",
+  "data": "base64-encoded-file-data",
+  "size": 1024000
+}
+```
+
+### Error Response
+
+If the conversion fails, a detailed error response is returned:
+
+```json filename="error-response"
+{
+  "error": "Incompatible or invalid conversion: FFmpeg failed: ffmpeg exited with code 234"
+}
+```
+
+<Callout type="note">
+**Timeout**: Default timeout is 60 seconds. Some formats (like AVIF) use optimized timeouts for better performance.
+</Callout>
+
+## Enhanced Features
+
+### GIF Processing
+- **Frame Extraction**: Automatically extracts first frame from animated GIFs
+- **Multiple Outputs**: GIF converts to PNG, JPG, AVIF, and PDF
+- **Optimized FFmpeg**: Uses specific parameters for reliable processing
+
+### Text-to-Image Conversion
+- **Canvas Rendering**: Text and markdown files convert to images
+- **Format Support**: `.txt` and `.md` files with proper layout
+- **Output Options**: JPG and PNG image generation
+
+### Performance Optimizations
+- **Fast Presets**: Format-specific encoding optimizations
+- **Memory Management**: Efficient processing with cleanup
+- **Timeout Handling**: Configurable time limits per format
+
+## Examples
+
+<CodeGroup>
+```bash filename="video-conversion" cURL
+# Convert video to MP4
+curl -X POST http://localhost:3000/api/convert \
+  -F "file=@video.webm" \
+  -F "format=mp4"
+
+# Convert GIF to PNG
+curl -X POST http://localhost:3000/api/convert \
+  -F "file=@animation.gif" \
+  -F "format=png"
+
+# Convert text to image
+curl -X POST http://localhost:3000/api/convert \
+  -F "file=@document.md" \
+  -F "format=jpg"
+```
+
+```javascript filename="javascript-example" JavaScript
+const formData = new FormData();
+formData.append("file", fileInput.files[0]);
+formData.append("format", "mp4");
+
+const response = await fetch("/api/convert", {
+  method: "POST",
+  body: formData,
+});
+
+if (response.ok) {
+  const result = await response.json();
+  if (result.success) {
+    // Convert base64 to blob
+    const binaryString = atob(result.data);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], { type: result.contentType });
+    
+    // Create download link
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = result.filename;
+    a.click();
+  }
+} else {
+  console.error('Conversion failed:', result.error);
+}
+```
+
+```python filename="python-example" Python
+import requests
+
+def convert_file(file_path, target_format):
+    url = "http://localhost:3000/api/convert"
+    
+    with open(file_path, 'rb') as f:
+        files = {'file': f}
+        data = {'format': target_format}
+        
+        response = requests.post(url, files=files, data=data)
+        
+        if response.ok:
+            result = response.json()
+            if result['success']:
+                # Decode base64 and save
+                import base64
+                file_data = base64.b64decode(result['data'])
+                
+                with open(result['filename'], 'wb') as output_file:
+                    output_file.write(file_data)
+                    
+                print(f"Successfully converted to {result['filename']}")
+            else:
+                print(f"Conversion failed: {result['error']}")
+        else:
+            print(f"HTTP Error: {response.status_code}")
+
+# Usage examples
+convert_file('video.webm', 'mp4')
+convert_file('document.md', 'jpg')
+convert_file('animation.gif', 'png')
+```
+
+</CodeGroup>
+
+## Error Handling
+
+### Common Error Types
+
+<Accordion>
+  <AccordionItem title="Unsupported Format">
+    ```json
+    {"error": "Cannot convert GIF to PDF directly via document task."}
+    ```
+  </AccordionItem>
+  
+  <AccordionItem title="FFmpeg Processing Error">
+    ```json
+    {"error": "Incompatible or invalid conversion: FFmpeg failed: ffmpeg exited with code 234"}
+    ```
+  </AccordionItem>
+  
+  <AccordionItem title="Timeout Error">
+    ```json
+    {"error": "The operation was aborted."}
+    ```
+  </AccordionItem>
+  
+  <AccordionItem title="File Processing Error">
+    ```json
+    {"error": "No file provided"}
+    ```
+  </AccordionItem>
+</Accordion>
+
+## Rate Limits & Performance
+
+- **Concurrent Requests**: Limited by server resources
+- **File Size**: Practical limits based on available memory
+- **Processing Time**: Varies by format and file complexity
+- **Memory Usage**: Temporary files cleaned up after processing
+
+<Callout type="tip">
+**Best Practice**: For large files, consider processing in chunks or using streaming uploads if supported by your client.
+</Callout>

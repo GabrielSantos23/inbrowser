@@ -1,0 +1,45 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "InBrowser",
+  "theme": "venus",
+  "logo": {
+    "light": "/favicon.svg",
+    "dark": "/favicon.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#16A34A",
+    "light": "#07C983",
+    "dark": "#15803D"
+  },
+  "api": {
+    "baseUrl": "https://inbrowser-api.vercel.app"
+  },
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": ["index", "quickstart", "development", "deployment", "changelog"]
+    },
+    {
+      "group": "Features",
+      "pages": ["features/file-conversion", "features/supported-formats"]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        "api-reference/introduction",
+        "api-reference/health",
+        "api-reference/convert"
+      ]
+    },
+    {
+      "group": "Internal",
+      "pages": ["development/testing-tools"]
+    }
+  ],
+  "footer": {
+    "socials": {
+      "github": "https://github.com/GabrielSantos23/inbrowser"
+    }
+  }
+}

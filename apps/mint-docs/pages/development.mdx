@@ -1,0 +1,59 @@
+---
+title: "Development Guide"
+description: "Understanding the InBrowser architecture and development workflow"
+---
+
+## Monorepo Structure
+
+InBrowser is built as a monorepo using **Bun Workspaces**, organizing code into applications and shared packages.
+
+### Apps
+
+- **`apps/server`**: The backend API service built with [Hono](https://hono.dev). Handles file uploads, processing, and streaming.
+- **`apps/web`**: The frontend user interface (React/Vite).
+- **`apps/docs`**: This documentation site (Mintlify).
+
+### Packages
+
+- **`packages/api`**: Shared API definitions, including tRPC routers and types used by both server and web clients.
+- **`packages/db`**: Database schemas and client (if applicable).
+
+## Core Technologies
+
+- **Runtime**: [Bun](https://bun.sh) (fast JavaScript runtime & package manager)
+- **Backend**: Hono (Edge-ready web framework)
+- **Media Processing**: FFmpeg (via `Bun.spawn`)
+- **Type Safety**: TypeScript & tRPC
+
+## Running Locally for Development
+
+To work on the project, you typically run the backend and frontend services simultaneously.
+
+1.  **Backend (Server)**
+
+    ```bash
+    cd apps/server
+    bun run dev
+    # Runs on http://localhost:3000
+    ```
+
+2.  **Frontend (Web)**
+
+    ```bash
+    cd apps/web
+    bun run dev
+    # Runs on http://localhost:5173 (usually)
+    ```
+
+3.  **Documentation**
+    ```bash
+    cd apps/docs
+    mint dev
+    # Runs on http://localhost:3001
+    ```
+
+## Code Standards
+
+- **Linting**: We use Biome or ESLint.
+- **Formatting**: Prettier/Biome.
+- **Commits**: Follow conventional commits (e.g., `feat: add pdf support`).

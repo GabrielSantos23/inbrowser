@@ -1,0 +1,64 @@
+## Get Started with the API
+
+The fastest way to use InBrowser is through our hosted API. No installation is required.
+
+**Base URL**: `https://inbrowser-api.vercel.app`
+
+### Quick Example: Convert a File
+
+You can convert files using a simple POST request.
+
+1.  **Send a conversion request**:
+
+    ```bash
+    curl -X POST https://inbrowser-api.vercel.app/api/convert \
+      -F "file=@test.txt" \
+      -F "format=pdf"
+    ```
+
+2.  **Handle the Response**:
+    The API returns a JSON object containing the conversion result:
+
+    ```json
+    {
+      "success": true,
+      "filename": "test.pdf",
+      "contentType": "application/pdf",
+      "data": "base64_encoded_string...",
+      "size": 12345
+    }
+    ```
+
+---
+
+## Alternative: Local Development
+
+If you prefer to run the converter on your own machine or contribute to the project, follow these steps.
+
+### Prerequisites
+
+Ensure you have the following installed:
+
+- **Bun** (v1.x or higher)
+- **Node.js** (v20+)
+- **FFmpeg** (Essential for media conversion)
+  - _Linux_: `sudo apt install ffmpeg` or `sudo pacman -S ffmpeg`
+  - _macOS_: `brew install ffmpeg`
+
+### Installation & Run
+
+1.  Clone and install:
+
+    ```bash
+    git clone https://github.com/your-username/InBrowser.git
+    cd InBrowser
+    bun install
+    ```
+
+2.  Start the server:
+    ```bash
+    cd apps/server
+    bun run dev
+    ```
+
+The local API will be available at `http://localhost:3000`.

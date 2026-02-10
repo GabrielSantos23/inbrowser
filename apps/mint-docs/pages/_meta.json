@@ -1,0 +1,9 @@
+{
+  "index": "Introduction",
+  "quickstart": "Quickstart",
+  "development": "Development Guide",
+  "features": "Features",
+  "deployment": "Deployment",
+  "changelog": "Changelog",
+  "api-reference": "API Reference"
+}
