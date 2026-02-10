@@ -255,17 +255,32 @@ app.post("/api/convert", async (c) => {
         );
       }
     }
-    // PDF to Image conversion
+// PDF to Image conversion
     else if (
       inputExt === "pdf" &&
       (outputExt === "jpg" || outputExt === "png")
     ) {
       try {
+        // Check if canvas is available (serverless environments might not have it)
+        let createCanvas;
+        try {
+          const canvasModule = await import("@napi-rs/canvas");
+          createCanvas = canvasModule.createCanvas;
+        } catch (canvasError) {
+          console.warn("Canvas not available for PDF to image conversion:", canvasError);
+          return c.json(
+            { 
+              error: `PDF to ${outputExt.toUpperCase()} conversion requires native dependencies not available in serverless environment.` 
+            },
+            400,
+          );
+        }
+
         // Use pdfjs-dist with proper worker setup
         const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-        const { createCanvas } = await import("@napi-rs/canvas");
 
-// Don't set worker - let pdfjs-dist use its defaults
+        // Set up worker properly - use empty string to use bundled worker
+        (pdfjs.GlobalWorkerOptions as any).workerSrc = "";
 
         const buffer = Buffer.from(await file.arrayBuffer());
         const loadingTask = pdfjs.getDocument({
@@ -306,7 +321,11 @@ app.post("/api/convert", async (c) => {
     // Text to Image conversion
     else if (["txt", "md"].includes(inputExt) && ["jpg", "jpeg", "png", "webp", "avif"].includes(outputExt)) {
       try {
-        const { createCanvas } = await import("@napi-rs/canvas");
+        // Try to import canvas - it might not be available in serverless environments
+        const canvasModule = await import("@napi-rs/canvas");
+        const createCanvas = canvasModule.createCanvas;
+        
+        // Use canvas if available
         const textContent = await file.text();
         const lines = textContent.split('\n').slice(0, 20); // Limit to 20 lines
         
@@ -336,10 +355,10 @@ app.post("/api/convert", async (c) => {
         contentType = outputExt === "png" ? "image/png" : "image/jpeg";
         filename = file.name.replace(/\.[^/.]+$/, `.${outputExt}`);
       } catch (canvasError) {
-        console.error("Canvas text to image conversion failed:", canvasError);
+        console.error("Text to image conversion failed:", canvasError);
         return c.json(
           {
-            error: `Cannot convert ${inputExt.toUpperCase()} to ${outputExt.toUpperCase()}: Canvas rendering failed.`,
+            error: `Cannot convert ${inputExt.toUpperCase()} to ${outputExt.toUpperCase()}: Text rendering requires native dependencies not available in serverless environment.`,
           },
           400,
         );

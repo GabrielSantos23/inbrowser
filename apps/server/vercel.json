@@ -12,5 +12,18 @@
       "src": "/(.*)",
       "dest": "api/index.ts"
     }
-  ]
+  ],
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 30,
+      "env": {
+        "CANVAS_SKIP_INSTALL": "true"
+      }
+    }
+  },
+  "build": {
+    "env": {
+      "CANVAS_SKIP_INSTALL": "true"
+    }
+  }
 }

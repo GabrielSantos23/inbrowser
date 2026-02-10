@@ -1,0 +1,295 @@
+---
+title: "Deployment"
+description: "How to deploy InBrowser to various platforms"
+---
+
+# Deployment Guide
+
+InBrowser can be deployed to various platforms with different considerations for each environment.
+
+## Vercel Deployment
+
+### Prerequisites
+- Node.js 18+ 
+- Bun package manager
+- Vercel account
+
+### Configuration Files
+
+The project includes optimized configuration for Vercel deployment:
+
+#### `vercel.json`
+```json filename="vercel.json"
+{
+  "name": "inbrowser-api",
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.ts"
+    }
+  ],
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 30,
+      "env": {
+        "CANVAS_SKIP_INSTALL": "true"
+      }
+    }
+  }
+}
+```
+
+#### `.npmrc`
+```filename=".npmrc"
+canvas_skip_install=true
+canvas_host_binary=false
+```
+
+#### `package.json` (Optional Dependencies)
+```json filename="package.json"
+{
+  "dependencies": {
+    // ... other dependencies
+  },
+  "optionalDependencies": {
+    "@napi-rs/canvas": "^0.1.91"
+  }
+}
+```
+
+### Deployment Steps
+
+1. **Connect Repository**
+   - Link your GitHub repository to Vercel
+   - Import the project
+
+2. **Configure Build Settings**
+   - **Build Command**: `bun run build`
+   - **Install Command**: `bun install`
+   - **Output Directory**: `dist`
+   - **Framework**: Other (Node.js)
+
+3. **Environment Variables**
+   - `NODE_ENV`: `production`
+   - `CANVAS_SKIP_INSTALL`: `true` (automatically set)
+
+4. **Deploy**
+   - Push changes to trigger deployment
+   - Monitor build logs for any issues
+
+### Serverless Limitations
+
+<Callout type="warning">
+**Canvas Dependencies**: Features requiring @napi-rs/canvas (text-to-images, PDF-to-images) are not available in Vercel's serverless environment and will gracefully fail with informative error messages.
+</Callout>
+
+**Working Features in Serverless**:
+- ✅ Video/Audio conversions (FFmpeg)
+- ✅ Basic image conversions
+- ✅ PDF to text/document conversions
+- ✅ GIF frame extraction
+- ✅ All format-agnostic processing
+
+**Limited Features**:
+- ❌ Text to image conversion
+- ❌ PDF to image conversion
+- ❌ Canvas-based rendering
+
+## Docker Deployment
+
+### Dockerfile
+```dockerfile filename="Dockerfile"
+FROM oven/bun:1.3-alpine
+
+# Install system dependencies for canvas
+RUN apk add --no-cache \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    musl-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev
+
+WORKDIR /app
+COPY package.json bun.lockb ./
+RUN bun install --frozen-lockfile
+
+COPY . .
+RUN bun run build
+
+EXPOSE 3000
+CMD ["bun", "run", "start"]
+```
+
+### Docker Compose
+```yaml filename="docker-compose.yml"
+version: '3.8'
+services:
+  inbrowser-api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./files:/app/files
+      - ./generated_test_files:/app/generated_test_files
+      - ./test_outputs:/app/test_outputs
+```
+
+## Local Development
+
+### Prerequisites
+- Bun runtime
+- FFmpeg (for media conversions)
+- Node.js 18+
+
+### Setup
+```bash filename="setup.sh"
+# Clone repository
+git clone <repository-url>
+cd inbrowser/apps/server
+
+# Install dependencies
+bun install
+
+# Generate missing test files
+bun run generate_missing_files.ts
+
+# Start development server
+bun run dev
+```
+
+### Environment Variables
+```bash filename=".env.local"
+NODE_ENV=development
+CORS_ORIGIN=*
+PORT=3000
+```
+
+## Platform-Specific Considerations
+
+### Vercel (Serverless)
+- **Pros**: Zero config, auto-scaling, global CDN
+- **Cons**: Limited to serverless functions, no native dependencies
+- **Best for**: API-only usage, web applications
+
+### Docker (Container)
+- **Pros**: Full feature support, native dependencies, portable
+- **Cons**: Requires container management, resource allocation
+- **Best for**: Full-featured deployments, on-premise hosting
+
+### Traditional Hosting (VPS/Dedicated)
+- **Pros**: Complete control, native dependencies, custom configurations
+- **Cons**: Manual setup, maintenance overhead
+- **Best for**: High-performance needs, custom integrations
+
+## Performance Optimization
+
+### Serverless Optimization
+- **Cold Starts**: Minimize initialization time
+- **Bundle Size**: Keep dependencies minimal
+- **Timeout Settings**: Configure appropriate function timeouts
+- **Memory Limits**: Optimize for serverless constraints
+
+### Resource Management
+- **FFmpeg Presets**: Use optimized encoding settings
+- **Timeout Handling**: Implement format-specific timeouts
+- **Memory Cleanup**: Ensure proper resource deallocation
+- **Error Handling**: Graceful degradation for unsupported features
+
+## Monitoring and Debugging
+
+### Vercel Analytics
+- Function execution metrics
+- Error tracking and logging
+- Performance monitoring
+- Usage analytics
+
+### Local Monitoring
+```bash filename="monitoring.sh"
+# Server logs
+tail -f server.log
+
+# Test conversions
+bun run test_all_conversions.ts
+
+# Health check
+curl http://localhost:3000/api/health
+```
+
+### Error Handling
+- **Structured Logging**: Use consistent log formats
+- **Error Categorization**: Classify error types for better debugging
+- **Graceful Degradation**: Provide fallbacks for unsupported features
+- **User Feedback**: Return informative error messages
+
+## Security Considerations
+
+### Serverless Security
+- **Input Validation**: Sanitize all file uploads
+- **Size Limits**: Implement reasonable file size restrictions
+- **Format Validation**: Verify supported file formats
+- **Timeout Protection**: Prevent long-running processes
+
+### Container Security
+- **Base Images**: Use minimal, secure base images
+- **Dependency Scanning**: Regular security audits
+- **Network Policies**: Restrict unnecessary network access
+- **Secret Management**: Use environment variables for sensitive data
+
+## Troubleshooting
+
+### Common Deployment Issues
+
+#### Canvas Installation Errors
+```bash
+# Solution: Skip canvas installation in serverless
+export CANVAS_SKIP_INSTALL=true
+```
+
+#### FFmpeg Not Found
+```bash
+# Solution: Ensure FFmpeg is in PATH
+which ffmpeg
+# Or use static binary
+npm install ffmpeg-static
+```
+
+#### Memory Issues
+```bash
+# Solution: Optimize memory usage
+export NODE_OPTIONS="--max-old-space-size=2048"
+```
+
+#### Timeout Errors
+```bash
+# Solution: Increase timeout limits
+# Configure in vercel.json or environment variables
+```
+
+### Performance Issues
+
+#### Slow Conversions
+- Check FFmpeg preset settings
+- Verify file size limits
+- Monitor resource usage
+
+#### Cold Start Latency
+- Optimize initialization code
+- Minimize dependency loading
+- Use edge functions where appropriate
+
+<Callout type="tip">
+**Pro Tip**: Always test deployments in a staging environment before production to identify platform-specific issues.
+</Callout>

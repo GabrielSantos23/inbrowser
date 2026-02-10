@@ -143,10 +143,16 @@ await new Promise((resolve, reject) => {
 
 ### ⚠️ Known Issues
 
-#### PDF to Image Conversions
-- **Status**: Still experiencing worker configuration issues
+#### Serverless Environment Limitations
+- **Status**: Canvas-dependent features not available in serverless environments
+- **Cause**: @napi-rs/canvas requires native dependencies (cairo, pixman)
+- **Impact**: Text-to-images and PDF-to-images gracefully fail in serverless
+- **Plan**: Features work in local environments with proper error handling
+
+#### PDF to Image Conversions (Local Only)
+- **Status**: Worker configuration issues persist in local environments
 - **Cause**: pdfjs-dist library workerSrc type validation
-- **Impact**: 2 out of 65 conversions still failing
+- **Impact**: 2 out of 65 conversions fail locally (work in serverless with graceful degradation)
 - **Plan**: Requires library replacement or extensive refactoring
 
 ### 📚 Documentation Updates

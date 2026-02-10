@@ -27,7 +27,7 @@
           },
           {
             "group": "Project",
-            "pages": ["changelog"]
+            "pages": ["deployment", "changelog"]
           }
         ]
       },

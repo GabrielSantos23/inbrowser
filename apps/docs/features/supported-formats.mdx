@@ -87,9 +87,19 @@ The API supports **65 different conversion pairs** with comprehensive cross-form
 
 ## Limitations
 
-- **PDF to Images**: Currently experiencing worker configuration issues with pdfjs-dist library
+### Serverless Environment Constraints
+- **Text to Images**: Requires native dependencies (@napi-rs/canvas) not available in serverless environments
+- **PDF to Images**: Requires native dependencies for canvas rendering in serverless environments
+- **Canvas Features**: Text rendering and PDF-to-image conversion gracefully degrade in serverless environments
+
+### General Limitations
 - **Complex Documents**: Some advanced PDF features may not render perfectly in text extraction
 - **Large Files**: Very large files may encounter timeout limits (configurable)
+- **Native Dependencies**: Features requiring system libraries (cairo, pixman) unavailable in serverless
+
+<Callout type="note">
+**Serverless Compatibility**: Core conversions (video, audio, basic image, document processing) work fully in serverless environments. Canvas-dependent features gracefully fail with informative error messages.
+</Callout>
 
 ## Future Support
 
