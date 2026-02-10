@@ -10,7 +10,7 @@ export interface FileItem {
   name: string;
   size: number;
   type: string;
-  category: "video" | "audio" | "image" | "document" | "unknown";
+  category: "video" | "audio" | "image" | "document" | "text" | "unknown";
   outputFormat: string;
   status: ConversionStatus;
   progress: number;

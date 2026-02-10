@@ -34,7 +34,7 @@ export interface ConversionResult {
   duration?: number;
 }
 
-const API_URL = "http://localhost:3000/api/convert";
+const API_URL = "https://inbrowser-api.vercel.app/api/convert";
 
 export async function convertFile(
   options: ConversionOptions,
@@ -69,34 +69,40 @@ export async function convertFile(
       }
     };
 
-    xhr.responseType = "blob";
+    xhr.responseType = "json";
 
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
-        const blob = xhr.response;
-        const baseName = inputFile.name.replace(/\.[^/.]+$/, "");
-        const outputFileName = `${baseName}.${outputFormat}`;
+        const response = xhr.response;
 
-        resolve({
-          blob,
-          fileName: outputFileName,
-          size: blob.size,
-        });
-      } else {
-        try {
-          // Try to read error message if blob is text
-          const reader = new FileReader();
-          reader.onload = () => {
-            reject(
-              new Error(
-                `Conversion failed: ${reader.result || xhr.statusText}`,
-              ),
-            );
-          };
-          reader.readAsText(xhr.response);
-        } catch (e) {
-          reject(new Error(`Conversion failed with status ${xhr.status}`));
+        if (response.success && response.data) {
+          try {
+            // Convert base64 to binary
+            const binaryString = window.atob(response.data);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+
+            const blob = new Blob([bytes], { type: response.contentType });
+
+            resolve({
+              blob,
+              fileName: response.filename,
+              size: response.size || blob.size,
+            });
+          } catch (e) {
+            reject(new Error("Failed to decode conversion data"));
+          }
+        } else {
+          reject(new Error(response.error || "Conversion failed"));
         }
+      } else {
+        const response = xhr.response;
+        const errorMessage =
+          response?.error || xhr.statusText || "Unknown error";
+        reject(new Error(`Conversion failed: ${errorMessage}`));
       }
     };
 
@@ -122,8 +128,12 @@ export const SUPPORTED_FORMATS = {
     output: ["webp", "png", "jpg", "avif", "pdf"],
   },
   document: {
-    input: ["pdf", "txt", "md"],
-    output: ["pdf", "txt", "jpg", "png", "docx"],
+    input: ["pdf"],
+    output: ["txt", "docx"],
+  },
+  text: {
+    input: ["txt", "md"],
+    output: ["pdf", "jpg", "png", "docx"],
   },
 };
 
@@ -141,12 +151,12 @@ export function getSupportedOutputFormats(inputFileName: string): string[] {
 
 export function getFileTypeCategory(
   fileName: string,
-): "video" | "audio" | "image" | "unknown" {
+): "video" | "audio" | "image" | "document" | "text" | "unknown" {
   const ext = fileName.split(".").pop()?.toLowerCase() || "";
 
   for (const [type, formats] of Object.entries(SUPPORTED_FORMATS)) {
     if (formats.input.includes(ext)) {
-      return type as "video" | "audio" | "image";
+      return type as "video" | "audio" | "image" | "document" | "text";
     }
   }
 

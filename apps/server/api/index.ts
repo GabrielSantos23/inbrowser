@@ -91,6 +91,100 @@ app.post("/api/convert", async (c) => {
         result = Buffer.from(pdf.output("arraybuffer"));
         contentType = "application/pdf";
         filename = file.name.replace(/\.[^/.]+$/, ".pdf");
+      } else if (
+        ["jpg", "jpeg", "png", "webp", "gif", "bmp", "tiff", "avif"].includes(inputExt)
+      ) {
+        // Convert image to PDF using FFmpeg for better format support
+        const { default: fluentFfmpeg } = await import("fluent-ffmpeg");
+        const { default: ffmpegPath } = await import("ffmpeg-static");
+        const fs = await import("node:fs");
+        const path = await import("node:path");
+        const { tmpdir } = await import("node:os");
+
+        if (ffmpegPath) {
+          fluentFfmpeg.setFfmpegPath(ffmpegPath);
+        }
+
+        const tempDir = fs.mkdtempSync(path.join(tmpdir(), "convert-"));
+        const inputPath = path.join(tempDir, `input.${inputExt}`);
+        const outputPath = path.join(tempDir, "output.pdf");
+
+        try {
+          const fileBuffer = Buffer.from(await file.arrayBuffer());
+          await fs.promises.writeFile(inputPath, fileBuffer);
+
+          await new Promise((resolve, reject) => {
+            fluentFfmpeg(inputPath)
+              .output(outputPath)
+              .on("end", resolve)
+              .on("error", reject)
+              .run();
+          });
+
+          result = Buffer.from(await fs.promises.readFile(outputPath));
+          contentType = "application/pdf";
+          filename = file.name.replace(/\.[^/.]+$/, ".pdf");
+        } catch (err) {
+          console.error("Image to PDF conversion failed:", err);
+          // Fallback to jsPDF for basic formats or convert complex formats first
+          if (["jpg", "jpeg", "png"].includes(inputExt)) {
+            const pdf = new jsPDF();
+            const imgData = Buffer.from(await file.arrayBuffer()).toString("base64");
+            const imgType = inputExt === "png" ? "PNG" : "JPEG";
+            pdf.addImage(imgData, imgType, 10, 10, 190, 0);
+            result = Buffer.from(pdf.output("arraybuffer"));
+            contentType = "application/pdf";
+            filename = file.name.replace(/\.[^/.]+$/, ".pdf");
+          } else if (["gif", "webp", "bmp", "tiff", "avif"].includes(inputExt)) {
+            // Convert complex image to PNG first, then use jsPDF
+            try {
+              const tempImagePath = path.join(tempDir, `temp.png`);
+              await new Promise((resolve, reject) => {
+                const command = fluentFfmpeg(inputPath)
+                  .output(tempImagePath)
+                  .outputOptions([
+                    "-vf", "select=eq(n\\,0)", // Select first frame
+                    "-vsync", "0", // No frame sync
+                    "-frames:v", "1", // Only one frame
+                    "-q:v", "2", // High quality
+                    "-update", "1" // Required for single image
+                  ])
+                  .on("end", resolve)
+                  .on("error", reject);
+                command.run();
+              });
+              
+              const tempImageBuffer = Buffer.from(await fs.promises.readFile(tempImagePath));
+              const pdf = new jsPDF();
+              const imgData = tempImageBuffer.toString("base64");
+              pdf.addImage(imgData, "PNG", 10, 10, 190, 0);
+              result = Buffer.from(pdf.output("arraybuffer"));
+              contentType = "application/pdf";
+              filename = file.name.replace(/\.[^/.]+$/, ".pdf");
+            } catch (conversionErr) {
+              console.error("Complex image to PDF conversion failed:", conversionErr);
+              return c.json(
+                {
+                  error: `Cannot convert ${inputExt.toUpperCase()} to PDF directly via document task.`,
+                },
+                400,
+              );
+            }
+          } else {
+            return c.json(
+              {
+                error: `Cannot convert ${inputExt.toUpperCase()} to PDF directly via document task.`,
+              },
+              400,
+            );
+          }
+        } finally {
+          try {
+            fs.rmSync(tempDir, { recursive: true, force: true });
+          } catch (cleanupErr) {
+            console.error("Cleanup error:", cleanupErr);
+          }
+        }
       } else {
         return c.json(
           {
@@ -143,10 +237,109 @@ app.post("/api/convert", async (c) => {
         result = text;
         contentType = "text/plain";
         filename = file.name.replace(/\.[^/.]+$/, ".txt");
+      } else if (inputExt === "pdf") {
+        const { PDFParse } = await import("pdf-parse");
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const parser = new PDFParse({ data: buffer });
+        const data = await parser.getText();
+        result = data.text;
+        contentType = "text/plain";
+        filename = file.name.replace(/\.[^/.]+$/, ".txt");
+        await parser.destroy();
       } else {
         return c.json(
           {
             error: `Cannot convert ${inputExt.toUpperCase()} to TXT directly via document task.`,
+          },
+          400,
+        );
+      }
+    }
+    // PDF to Image conversion
+    else if (
+      inputExt === "pdf" &&
+      (outputExt === "jpg" || outputExt === "png")
+    ) {
+      try {
+        // Use pdfjs-dist with proper worker setup
+        const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+        const { createCanvas } = await import("@napi-rs/canvas");
+
+// Don't set worker - let pdfjs-dist use its defaults
+
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const loadingTask = pdfjs.getDocument({
+          data: new Uint8Array(buffer),
+          verbosity: 0,
+        });
+
+        const pdfDocument = await loadingTask.promise;
+        const page = await pdfDocument.getPage(1); // Get first page
+        const viewport = page.getViewport({ scale: 2.0 });
+
+        const canvas = createCanvas(viewport.width, viewport.height);
+        const context = canvas.getContext("2d");
+
+        await (page as any).render({
+          canvasContext: context as any,
+          canvas: canvas as any,
+          viewport: viewport,
+        }).promise;
+
+        if (outputExt === "png") {
+          result = await canvas.toBuffer("image/png");
+        } else {
+          result = await canvas.toBuffer("image/jpeg");
+        }
+        contentType = outputExt === "png" ? "image/png" : "image/jpeg";
+        filename = file.name.replace(/\.[^/.]+$/, `.${outputExt}`);
+
+        await pdfDocument.destroy();
+      } catch (pdfError) {
+        console.error("PDF to image conversion failed:", pdfError);
+        return c.json(
+          { error: `PDF to ${outputExt.toUpperCase()} conversion failed: ${pdfError.message}` },
+          400,
+        );
+      }
+    }
+    // Text to Image conversion
+    else if (["txt", "md"].includes(inputExt) && ["jpg", "jpeg", "png", "webp", "avif"].includes(outputExt)) {
+      try {
+        const { createCanvas } = await import("@napi-rs/canvas");
+        const textContent = await file.text();
+        const lines = textContent.split('\n').slice(0, 20); // Limit to 20 lines
+        
+        const canvas = createCanvas(800, 600);
+        const ctx = canvas.getContext('2d');
+        
+        // White background
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 800, 600);
+        
+        // Black text
+        ctx.fillStyle = 'black';
+        ctx.font = '16px monospace';
+        
+        let y = 30;
+        for (const line of lines) {
+          if (y > 580) break; // Stop if we run out of space
+          ctx.fillText(line.substring(0, 80), 20, y); // Limit line length
+          y += 20;
+        }
+        
+        if (outputExt === "png") {
+          result = await canvas.toBuffer("image/png");
+        } else {
+          result = await canvas.toBuffer("image/jpeg");
+        }
+        contentType = outputExt === "png" ? "image/png" : "image/jpeg";
+        filename = file.name.replace(/\.[^/.]+$/, `.${outputExt}`);
+      } catch (canvasError) {
+        console.error("Canvas text to image conversion failed:", canvasError);
+        return c.json(
+          {
+            error: `Cannot convert ${inputExt.toUpperCase()} to ${outputExt.toUpperCase()}: Canvas rendering failed.`,
           },
           400,
         );
@@ -178,8 +371,33 @@ app.post("/api/convert", async (c) => {
         console.log(`Starting ffmpeg: ${inputPath} -> ${outputPath}`);
 
         await new Promise((resolve, reject) => {
-          const command = fluentFfmpeg(inputPath)
-            .output(outputPath)
+          const command = fluentFfmpeg(inputPath).output(outputPath);
+
+          // Special handling for different conversions
+          if (inputExt === "gif" && ["png", "jpg", "jpeg", "webp", "avif"].includes(outputExt)) {
+            // Convert GIF to static image - extract first frame with better handling
+            command.outputOptions([
+              "-vf", "select=eq(n\\,0)", // Select first frame
+              "-vsync", "0", // No frame sync
+              "-frames:v", "1", // Only one frame
+              "-q:v", "2", // High quality
+              "-update", "1" // Required for single image output
+            ]);
+} else if (["mp4", "webm", "gif"].includes(outputExt)) {
+            command.outputOptions("-preset ultrafast");
+          } else if (outputExt === "webp") {
+            // WEBP doesn't support ultrafast preset
+            command.outputOptions("-preset fast");
+          } else if (outputExt === "avif") {
+            // Special handling for AVIF to avoid timeout
+            command.outputOptions([
+              "-preset", "fast", // Use fast preset instead of ultrafast
+              "-crf", "30", // Lower quality for faster conversion
+              "-t", "10" // Limit to 10 seconds of input
+            ]);
+          }
+
+          command
             .on("end", () => {
               console.log("FFmpeg conversion finished");
               resolve(null);
@@ -234,17 +452,21 @@ app.post("/api/convert", async (c) => {
     }
 
     // Convert result to base64 for JSON response
-    const base64Data = typeof result === "string" 
-      ? Buffer.from(result).toString("base64")
-      : result.toString("base64");
+    const base64Data =
+      typeof result === "string"
+        ? Buffer.from(result).toString("base64")
+        : result.toString("base64");
 
-    return c.json({
-      success: true,
-      filename: filename,
-      contentType: contentType,
-      data: base64Data,
-      size: result.length
-    }, 200);
+    return c.json(
+      {
+        success: true,
+        filename: filename,
+        contentType: contentType,
+        data: base64Data,
+        size: result.length,
+      },
+      200,
+    );
   } catch (error) {
     console.error("Conversion error:", error);
     return c.json({ error: "Conversion failed" }, 500);

@@ -18,12 +18,26 @@ Currently, the API is open for development purposes. Authentication details will
 By default, the API is accessible at:
 
 ```bash
-http://localhost:3000
+https://inbrowser-api.vercel.app
 ```
 
 ## Response Format
 
-All API responses are returned in JSON format (for errors/metadata) or binary streams (for file conversions).
+All API responses are returned in JSON format. Successful conversions return the file content as a base64 encoded string along with metadata.
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "filename": "output.pdf",
+  "contentType": "application/pdf",
+  "data": "JVBERi0xLjQKJ...",
+  "size": 1439866
+}
+```
+
+### Error Response
 
 ```json
 {

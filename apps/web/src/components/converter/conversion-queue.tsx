@@ -432,6 +432,7 @@ function FileIcon({ fileName }: { fileName: string }) {
   const isVideo = ["mp4", "mov", "avi", "webm", "mkv"].includes(ext || "");
   const isAudio = ["mp3", "wav", "aac", "ogg"].includes(ext || "");
   const isDoc = ["pdf", "docx", "pptx", "csv", "xlsx"].includes(ext || "");
+  const isText = ["txt", "md"].includes(ext || "");
 
   let Icon = FileText;
   let colorClass = "text-muted-foreground bg-muted border-border";
@@ -449,6 +450,9 @@ function FileIcon({ fileName }: { fileName: string }) {
   } else if (isDoc) {
     Icon = FileText;
     colorClass = "text-blue-500 bg-blue-500/10 border-blue-500/20";
+  } else if (isText) {
+    Icon = FileText;
+    colorClass = "text-gray-500 bg-gray-500/10 border-gray-500/20";
   }
 
   return (

@@ -20,7 +20,7 @@ interface FormatSelectorProps {
   formats: string[];
   selected: string;
   onChange: (format: string) => void;
-  category: "video" | "audio" | "image" | "document" | "unknown";
+  category: "video" | "audio" | "image" | "document" | "text" | "unknown";
   className?: string; // Added className prop
 }
 
@@ -42,6 +42,9 @@ const formatDescriptions: Record<
   png: { name: "PNG", description: "Sem perda com transparência" },
   jpg: { name: "JPG", description: "Fotos comprimidas" },
   avif: { name: "AVIF", description: "Próxima geração" },
+  pdf: { name: "PDF", description: "Documento portátil" },
+  txt: { name: "TXT", description: "Texto simples" },
+  docx: { name: "DOCX", description: "Documento Word" },
 };
 
 const categoryIcons = {
@@ -49,6 +52,7 @@ const categoryIcons = {
   audio: FileAudio,
   image: ImageIcon,
   document: FileText,
+  text: FileText,
   unknown: FileVideo,
 };
 

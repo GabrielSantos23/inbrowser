@@ -1,66 +1,64 @@
+## Get Started with the API
+
+The fastest way to use InBrowser is through our hosted API. No installation is required.
+
+**Base URL**: `https://inbrowser-api.vercel.app`
+
+### Quick Example: Convert a File
+
+You can convert files using a simple POST request.
+
+1.  **Send a conversion request**:
+
+    ```bash
+    curl -X POST https://inbrowser-api.vercel.app/api/convert \
+      -F "file=@test.txt" \
+      -F "format=pdf"
+    ```
+
+2.  **Handle the Response**:
+    The API returns a JSON object containing the conversion result:
+
+    ```json
+    {
+      "success": true,
+      "filename": "test.pdf",
+      "contentType": "application/pdf",
+      "data": "base64_encoded_string...",
+      "size": 12345
+    }
+    ```
+
 ---
-title: "Quickstart"
-description: "Start using InBrowser API in minutes"
----
 
-## Prerequisites
+## Alternative: Local Development
 
-Before running the project locally, ensure you have the following installed:
+If you prefer to run the converter on your own machine or contribute to the project, follow these steps.
 
-- **Bun** (v1.x or higher) - Used as the package manager and runtime.
-- **Node.js** (v20+ recommended) - Required for some build tools.
-- **FFmpeg** - Essential for media conversion (video/audio).
-  - _Linux (Arch)_: `sudo pacman -S ffmpeg`
-  - _Linux (Ubuntu)_: `sudo apt install ffmpeg`
+### Prerequisites
+
+Ensure you have the following installed:
+
+- **Bun** (v1.x or higher)
+- **Node.js** (v20+)
+- **FFmpeg** (Essential for media conversion)
+  - _Linux_: `sudo apt install ffmpeg` or `sudo pacman -S ffmpeg`
   - _macOS_: `brew install ffmpeg`
 
-## Installation
+### Installation & Run
 
-1.  Clone the repository:
+1.  Clone and install:
 
     ```bash
     git clone https://github.com/your-username/InBrowser.git
     cd InBrowser
-    ```
-
-2.  Install dependencies using Bun:
-
-    ```bash
     bun install
     ```
 
-## Running the Server
-
-Start the backend development server from the project root:
-
-```bash
-# Navigate to server app
-cd apps/server
-
-# Start dev server
-bun run dev
-```
-
-The API will be available at `http://localhost:3000`.
-
-## Example: Convert a File
-
-You can verify the setup by converting a simple text file to PDF.
-
-1.  Create a sample file:
-
+2.  Start the server:
     ```bash
-    echo "Hello World" > test.txt
+    cd apps/server
+    bun run dev
     ```
 
-2.  Send a conversion request:
-
-    ```bash
-    curl -X POST http://localhost:3000/api/convert \
-      -F "file=@test.txt" \
-      -F "format=pdf" \
-      --output test.pdf
-    ```
-
-3.  Check the result:
-    You should see `test.pdf` in your directory.
+The local API will be available at `http://localhost:3000`.
