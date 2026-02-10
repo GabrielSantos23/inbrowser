@@ -31,7 +31,7 @@ The server includes optimized configuration for Vercel deployment:
   "functions": {
     "api/index.ts": {
       "maxDuration": 30,
-      "runtime": "nodejs18.x"
+      "runtime": "@vercel/node"
     }
   },
   "rewrites": [
@@ -97,7 +97,7 @@ canvas_host_binary=false
    - **Install Command**: `bun install`
    - **Output Directory**: `dist`
    - **Framework**: null (custom Node.js)
-   - **Runtime**: Node.js 18.x
+   - **Runtime**: @vercel/node
    - **Function Timeout**: 30 seconds
 
 3. **Environment Variables**
