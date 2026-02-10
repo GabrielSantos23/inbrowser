@@ -15,15 +15,15 @@
   ],
   "functions": {
     "api/index.ts": {
-      "maxDuration": 30,
-      "env": {
-        "CANVAS_SKIP_INSTALL": "true"
-      }
+      "maxDuration": 30
     }
   },
   "build": {
     "env": {
       "CANVAS_SKIP_INSTALL": "true"
     }
+  },
+  "env": {
+    "CANVAS_SKIP_INSTALL": "true"
   }
 }
