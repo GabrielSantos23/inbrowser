@@ -1,16 +1,8 @@
 {
-  "name": "inbrowser-api",
-  "version": 2,
   "builds": [
     {
       "src": "api/index.ts",
       "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "api/index.ts"
     }
   ],
   "functions": {
@@ -18,12 +10,10 @@
       "maxDuration": 30
     }
   },
-  "build": {
-    "env": {
-      "CANVAS_SKIP_INSTALL": "true"
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.ts"
     }
-  },
-  "env": {
-    "CANVAS_SKIP_INSTALL": "true"
-  }
+  ]
 }

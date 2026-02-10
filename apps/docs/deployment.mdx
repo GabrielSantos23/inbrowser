@@ -14,25 +14,20 @@ InBrowser can be deployed to various platforms with different considerations for
 - Bun package manager
 - Vercel account
 
+### Architecture Note
+Only the `apps/server` folder is hosted on Vercel as a serverless API. The frontend is deployed separately.
+
 ### Configuration Files
 
-The project includes optimized configuration for Vercel deployment:
+The server includes optimized configuration for Vercel deployment:
 
-#### `vercel.json`
+#### `apps/server/vercel.json`
 ```json filename="vercel.json"
 {
-  "name": "inbrowser-api",
-  "version": 2,
   "builds": [
     {
       "src": "api/index.ts",
       "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "api/index.ts"
     }
   ],
   "functions": {
@@ -40,16 +35,38 @@ The project includes optimized configuration for Vercel deployment:
       "maxDuration": 30
     }
   },
-  "build": {
-    "env": {
-      "CANVAS_SKIP_INSTALL": "true"
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.ts"
     }
+  ]
+}
+```
+
+#### `apps/server/.npmrc`
+```filename=".npmrc"
+canvas_skip_install=true
+canvas_host_binary=false
+```
+
+#### `apps/server/package.json` (Optional Dependencies)
+```json filename="package.json"
+{
+  "dependencies": {
+    // ... other dependencies
   },
-  "env": {
-    "CANVAS_SKIP_INSTALL": "true"
+  "optionalDependencies": {
+    "@napi-rs/canvas": "^0.1.91"
   }
 }
 ```
+
+#### Environment Variables
+Set the following environment variables in your Vercel project dashboard:
+
+- **`CANVAS_SKIP_INSTALL`**: `true`
+- **`NODE_ENV`**: `production`
 
 #### `.npmrc`
 ```filename=".npmrc"
@@ -73,17 +90,19 @@ canvas_host_binary=false
 
 1. **Connect Repository**
    - Link your GitHub repository to Vercel
-   - Import the project
+   - Import only the `apps/server` folder as a new project
 
 2. **Configure Build Settings**
+   - **Root Directory**: `apps/server`
    - **Build Command**: `bun run build`
    - **Install Command**: `bun install`
    - **Output Directory**: `dist`
    - **Framework**: Other (Node.js)
 
 3. **Environment Variables**
+   Set in Vercel project dashboard for the server:
    - `NODE_ENV`: `production`
-   - `CANVAS_SKIP_INSTALL`: `true` (automatically set)
+   - `CANVAS_SKIP_INSTALL`: `true`
 
 4. **Deploy**
    - Push changes to trigger deployment
