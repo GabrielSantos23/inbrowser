@@ -24,21 +24,20 @@ The server includes optimized configuration for Vercel deployment:
 #### `apps/server/vercel.json`
 ```json filename="vercel.json"
 {
-  "builds": [
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node"
-    }
-  ],
+  "buildCommand": "bun run build",
+  "outputDirectory": "dist",
+  "installCommand": "bun install",
+  "framework": null,
   "functions": {
     "api/index.ts": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "runtime": "nodejs18.x"
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "api/index.ts"
+      "source": "/(.*)",
+      "destination": "/api/index.ts"
     }
   ]
 }
@@ -97,8 +96,9 @@ canvas_host_binary=false
    - **Build Command**: `bun run build` (TypeScript compilation)
    - **Install Command**: `bun install`
    - **Output Directory**: `dist`
-   - **Framework**: Other (Node.js)
-   - **Node Version**: 18.x (or higher)
+   - **Framework**: null (custom Node.js)
+   - **Runtime**: Node.js 18.x
+   - **Function Timeout**: 30 seconds
 
 3. **Environment Variables**
    Set in Vercel project dashboard for the server:
