@@ -312,8 +312,9 @@ app.post("/api/convert", async (c) => {
         await pdfDocument.destroy();
       } catch (pdfError) {
         console.error("PDF to image conversion failed:", pdfError);
+        const errorMessage = pdfError instanceof Error ? pdfError.message : String(pdfError);
         return c.json(
-          { error: `PDF to ${outputExt.toUpperCase()} conversion failed: ${pdfError.message}` },
+          { error: `PDF to ${outputExt.toUpperCase()} conversion failed: ${errorMessage}` },
           400,
         );
       }
