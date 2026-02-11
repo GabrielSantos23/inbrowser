@@ -115,7 +115,6 @@ async function bootstrap() {
     for (const ext of allInputs) {
       if (fileRegistry[ext]) continue;
 
-      // Find a way to create 'ext' from something we have
       for (const [srcExt, srcPath] of Object.entries(fileRegistry)) {
         let isPossible = false;
         for (const cat of Object.values(SUPPORTED_FORMATS)) {

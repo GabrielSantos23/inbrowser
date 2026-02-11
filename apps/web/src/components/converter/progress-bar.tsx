@@ -16,7 +16,6 @@ export function ProgressBar({
   return (
     <div className="w-full space-y-1.5">
       <div className="relative h-2 bg-muted rounded-full overflow-hidden">
-        {/* Background shimmer effect */}
         <div className="absolute inset-0 overflow-hidden">
           <motion.div
             className="absolute inset-0 w-[200%] bg-gradient-to-r from-transparent via-white/10 to-transparent"
@@ -25,14 +24,12 @@ export function ProgressBar({
           />
         </div>
 
-        {/* Progress fill */}
         <motion.div
           className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary to-primary/80 rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${clampedProgress}%` }}
           transition={{ type: "spring", stiffness: 100, damping: 20 }}
         >
-          {/* Glow effect */}
           <motion.div
             className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full blur-md"
             animate={{ opacity: [0.5, 1, 0.5] }}

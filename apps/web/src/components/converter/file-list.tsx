@@ -124,7 +124,6 @@ export function FileItemCard({ item, index }: FileItemCardProps) {
           hover:bg-card transition-colors duration-200
         `}
       >
-        {/* Progress overlay for converting state */}
         {item.status === "converting" && (
           <motion.div
             className="absolute inset-0 bg-primary/5 pointer-events-none"
@@ -135,9 +134,7 @@ export function FileItemCard({ item, index }: FileItemCardProps) {
         )}
 
         <div className="relative z-10 flex flex-col gap-4">
-          {/* Header row */}
           <div className="flex items-start gap-4">
-            {/* File type icon */}
             <motion.div
               className={`p-3 rounded-xl ${config.bgColor} shrink-0`}
               whileHover={{ scale: 1.05 }}
@@ -145,7 +142,6 @@ export function FileItemCard({ item, index }: FileItemCardProps) {
               <CategoryIcon className={`w-6 h-6 ${config.color}`} />
             </motion.div>
 
-            {/* File info */}
             <div className="flex-1 min-w-0">
               <h4
                 className="font-medium text-foreground truncate"
@@ -170,7 +166,6 @@ export function FileItemCard({ item, index }: FileItemCardProps) {
               </div>
             </div>
 
-            {/* Status badge */}
             <div
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig[item.status].color} bg-background border`}
             >
@@ -180,7 +175,6 @@ export function FileItemCard({ item, index }: FileItemCardProps) {
               <span>{statusConfig[item.status].text}</span>
             </div>
 
-            {/* Actions */}
             <div className="flex items-center gap-1 shrink-0">
               {item.status === "completed" && (
                 <motion.div
@@ -224,7 +218,6 @@ export function FileItemCard({ item, index }: FileItemCardProps) {
             </div>
           </div>
 
-          {/* Conversion options row */}
           {item.status === "pending" && outputFormats.length > 0 && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -244,14 +237,12 @@ export function FileItemCard({ item, index }: FileItemCardProps) {
             </motion.div>
           )}
 
-          {/* Progress bar */}
           {item.status === "converting" && (
             <div className="pl-16">
               <ProgressBar progress={item.progress} />
             </div>
           )}
 
-          {/* Error message */}
           {item.status === "error" && item.error && (
             <motion.div
               initial={{ opacity: 0 }}

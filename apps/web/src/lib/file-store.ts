@@ -26,7 +26,6 @@ export interface FileItem {
 interface FileStore {
   files: FileItem[];
 
-  // Actions
   addFiles: (files: FileItem[]) => void;
   removeFile: (id: string) => void;
   clearFiles: () => void;

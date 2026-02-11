@@ -29,7 +29,7 @@ const ACCEPT_CONFIG = {
   "text/plain": [".txt", ".md"],
 };
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2GB
+const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024;
 
 interface DropZoneProps {
   className?: string;
@@ -96,7 +96,7 @@ export function DropZone({ className }: DropZoneProps) {
     accept: ACCEPT_CONFIG,
     maxSize: MAX_FILE_SIZE,
     multiple: true,
-    noClick: true, // we will handle click manually with button
+    noClick: true,
     noKeyboard: true,
   });
 
@@ -125,7 +125,6 @@ export function DropZone({ className }: DropZoneProps) {
     >
       <input {...getInputProps()} id="file-drop-input" />
 
-      {/* Cloud Icon */}
       <div className="mb-6 animate-fade-in-up">
         <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary shadow-sm">
           <Cloud className="w-8 h-8" fill="currentColor" fillOpacity={0.2} />
@@ -148,16 +147,6 @@ export function DropZone({ className }: DropZoneProps) {
         >
           Choose Files
         </Button>
-        <button className="w-12 h-12 bg-card border border-border hover:bg-accent rounded-xl flex items-center justify-center transition-colors">
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/d/da/Google_Drive_logo_%282020%29.svg"
-            alt="Drive"
-            className="w-6 h-6"
-          />
-        </button>
-        <button className="w-12 h-12 bg-card border border-border hover:bg-accent rounded-xl flex items-center justify-center transition-colors">
-          <Folder className="w-6 h-6 text-primary" />
-        </button>
       </div>
 
       {isDragReject && (

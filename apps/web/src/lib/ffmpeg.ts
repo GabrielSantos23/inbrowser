@@ -5,7 +5,6 @@ export interface FFmpegProgress {
 
 export type ProgressCallback = (progress: FFmpegProgress) => void;
 
-// Keep this for compatibility with existing code calls, but it will do nothing/resolve immediately
 export async function loadFFmpeg(
   onProgress?: (loaded: number, total: number) => void,
 ): Promise<any> {
@@ -13,7 +12,6 @@ export async function loadFFmpeg(
   return Promise.resolve({});
 }
 
-// Keep this for compatibility
 export function getFFmpeg(): any {
   return {};
 }
@@ -41,7 +39,6 @@ export async function convertFile(
 ): Promise<ConversionResult> {
   const { inputFile, outputFormat, onProgress } = options;
 
-  // Validate support before sending
   const supported = getSupportedOutputFormats(inputFile.name);
   if (!supported.includes(outputFormat)) {
     throw new Error(
@@ -63,7 +60,6 @@ export async function convertFile(
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable && onProgress) {
-        // Show upload progress
         const percent = (event.loaded / event.total) * 100;
         onProgress({ progress: percent, time: 0 });
       }
@@ -77,7 +73,6 @@ export async function convertFile(
 
         if (response.success && response.data) {
           try {
-            // Convert base64 to binary
             const binaryString = window.atob(response.data);
             const len = binaryString.length;
             const bytes = new Uint8Array(len);

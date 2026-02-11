@@ -21,7 +21,7 @@ interface FormatSelectorProps {
   selected: string;
   onChange: (format: string) => void;
   category: "video" | "audio" | "image" | "document" | "text" | "unknown";
-  className?: string; // Added className prop
+  className?: string;
 }
 
 const formatDescriptions: Record<

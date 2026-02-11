@@ -39,7 +39,6 @@ export function ConversionActions() {
     setFFmpegLoading(true);
 
     try {
-      // Load FFmpeg first
       await loadFFmpeg((loaded, total) => {
         setFFmpegLoadProgress((loaded / total) * 100);
       });
@@ -48,7 +47,6 @@ export function ConversionActions() {
 
       toast.success("Motor FFmpeg carregado com sucesso!");
 
-      // Convert files sequentially to avoid memory issues
       for (const file of pendingFiles) {
         try {
           setConversionStatus(file.id, "converting");
@@ -103,7 +101,6 @@ export function ConversionActions() {
 
     try {
       if (completedFiles.length === 1) {
-        // Single file - download directly
         const file = completedFiles[0];
         if (file.result) {
           const url = URL.createObjectURL(file.result.blob);
@@ -116,7 +113,6 @@ export function ConversionActions() {
           URL.revokeObjectURL(url);
         }
       } else {
-        // Multiple files - create ZIP
         const zip = new JSZip();
 
         for (const file of completedFiles) {
@@ -157,7 +153,6 @@ export function ConversionActions() {
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-card/50 border backdrop-blur-sm"
     >
-      {/* Left side - Stats */}
       <div className="flex items-center gap-4 text-sm text-muted-foreground">
         <span>
           <strong className="text-foreground">{files.length}</strong> arquivo
@@ -189,7 +184,6 @@ export function ConversionActions() {
         </AnimatePresence>
       </div>
 
-      {/* Right side - Actions */}
       <div className="flex items-center gap-2">
         <Button
           variant="outline"

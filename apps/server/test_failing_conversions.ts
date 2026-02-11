@@ -64,24 +64,47 @@ async function convert(
 async function testFailingConversions() {
   log("--- Testing Previously Failing Conversions ---");
 
-  // Test the specific conversions that were failing
   const tests = [
-    // GIF conversions
-    { input: "generated_test_files/file_example_AVI_480_750kB_to_1770681156120.gif", output: "png", key: "gif->png" },
-    { input: "generated_test_files/file_example_AVI_480_750kB_to_1770681156120.gif", output: "jpg", key: "gif->jpg" },
-    { input: "generated_test_files/file_example_AVI_480_750kB_to_1770681156120.gif", output: "avif", key: "gif->avif" },
-    { input: "generated_test_files/file_example_AVI_480_750kB_to_1770681156120.gif", output: "pdf", key: "gif->pdf" },
-    
-    // Image to PDF conversions
-    { input: "files/Animais_Cat_November_2010-1a.png", output: "pdf", key: "png->pdf" }, // Use existing PNG
-    { input: "generated_test_files/sample.jpeg", output: "pdf", key: "jpeg->pdf" }, // Use generated JPEG
-    
-    // PDF to image conversions
+    {
+      input:
+        "generated_test_files/file_example_AVI_480_750kB_to_1770681156120.gif",
+      output: "png",
+      key: "gif->png",
+    },
+    {
+      input:
+        "generated_test_files/file_example_AVI_480_750kB_to_1770681156120.gif",
+      output: "jpg",
+      key: "gif->jpg",
+    },
+    {
+      input:
+        "generated_test_files/file_example_AVI_480_750kB_to_1770681156120.gif",
+      output: "avif",
+      key: "gif->avif",
+    },
+    {
+      input:
+        "generated_test_files/file_example_AVI_480_750kB_to_1770681156120.gif",
+      output: "pdf",
+      key: "gif->pdf",
+    },
+
+    {
+      input: "files/Animais_Cat_November_2010-1a.png",
+      output: "pdf",
+      key: "png->pdf",
+    },
+    {
+      input: "generated_test_files/sample.jpeg",
+      output: "pdf",
+      key: "jpeg->pdf",
+    },
+
     { input: "files/file-sample_150kB.pdf", output: "jpg", key: "pdf->jpg" },
     { input: "files/file-sample_150kB.pdf", output: "png", key: "pdf->png" },
-    
-    // Text to image conversions
-    { input: "generated_test_files/sample.md", output: "jpg", key: "md->jpg" }, // Use MD instead of TXT
+
+    { input: "generated_test_files/sample.md", output: "jpg", key: "md->jpg" },
     { input: "generated_test_files/sample.md", output: "png", key: "md->png" },
   ];
 
@@ -96,7 +119,7 @@ async function testFailingConversions() {
     log(`[TEST] ${test.key}`);
     const res = await convert(test.input, test.output, OUTPUT_DIR);
     results.push({ key: test.key, success: res.success, error: res.error });
-    
+
     if (res.success) {
       log(`  ✓ Success`);
     } else {
